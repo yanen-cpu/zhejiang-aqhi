@@ -10,9 +10,27 @@ function api(path){
   return base + path;
 }
 
+// 当站点未配置 /api/* 路由时，自动回退到 workers.dev，避免用户手动设置
+const DEFAULT_WORKER_BASE = 'https://zj-aqhi-worker.1779939926.workers.dev';
+
+async function fetchWithFallback(urlPath, options){
+  const primary = api(urlPath);
+  try {
+    const r = await fetch(primary, options);
+    if (r && r.ok) return r;
+    // 若 base 为空或 primary 失败，回退到 workers.dev
+  } catch(_) {}
+  try {
+    const r2 = await fetch(DEFAULT_WORKER_BASE.replace(/\/$/, '') + urlPath, options);
+    return r2;
+  } catch (e) {
+    throw e;
+  }
+}
+
 async function fetchMeta() {
   try {
-    const res = await fetch(api('/api/meta'));
+    const res = await fetchWithFallback('/api/meta');
     if (!res.ok) throw new Error('meta failed');
     return await res.json();
   } catch { return null; }
@@ -28,7 +46,7 @@ async function updateDataSourceLabel() {
 }
 
 async function fetchAll() {
-  const res = await fetch(api('/api/aqhi-all'));
+  const res = await fetchWithFallback('/api/aqhi-all');
   if (!res.ok) throw new Error('API 请求失败');
   return await res.json();
 }
