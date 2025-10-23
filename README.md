@@ -115,8 +115,69 @@ npm run deploy
 - 刷新站点首页与地图页，AQHI 指标应展示正常
 
 说明：
-- Worker 默认 `DATA_SOURCE=mock`，每小时第 5 分（Cron）抓取一次；首次访问如果当前小时没有数据，mock 模式会自动补一轮，避免页面显示 `--`。
+- Worker 默认 `DATA_SOURCE=cnemc`（已内置接入国家环境监测站 CNEMC 的公开接口），每小时第 5 分（Cron）抓取一次。
+- 如果你还没为 Pages 站点配置 `/api/*` 路由到 Worker，也可以在浏览器控制台临时指定前端 API：
+  ```js
+  localStorage.setItem('AQHI_API_BASE', 'https://你的workers子域.workers.dev');
+  // 刷新页面生效
+  ```
 - CORS 默认允许所有来源（`origin: *`），可在 `worker/src/index.ts` 中按需限制到你的域名。
+
+### 使用 CNEMC 官方数据源（cnemc）
+
+本仓库已默认启用 `cnemc` 数据源，按城市代码调用 `https://air.cnemc.cn:18007` 的公开接口，获取每市 PM2_5、O3、NO2、SO2。
+
+- 已内置浙江 11 市 citycode 映射：
+  - 杭州330100，宁波330200，温州330300，嘉兴330400，湖州330500，绍兴330600，金华330700，衢州330800，舟山330900，台州331000，丽水331100
+- 调用与容错：
+  - 首选“城市实时历史”接口 `GetCityRealTimeAqiHistoryByCondition`（大小写/参数名 citycode/cityCode 多种变体已做回退）。
+  - 若该接口不可用，则回退到“站点实时” `GetAQIDataPublishLive`，对全市站点做算术平均得到城市级污染物值。
+- 快速测试（不入库）：
+  - GET `/api/admin/test-ds?city=宁波`（city 为中文城市名）
+- 立即抓取一轮（入库 11 市当前小时）：
+  - GET 或 POST `/api/admin/fetch-once`
+- 查看聚合结果：
+  - GET `/api/aqhi-all` 或 `/api/aqhi?city=宁波`
+
+注意：
+- 该接口为公开站点，但可能存在限流或大小写差异；本项目已补充 Referer/Origin/UA 等请求头并内置多种回退路径。
+- 回退到站点平均时，结果与官方“城市聚合”可能略有差异，属于可接受偏差范围。
+
+### 接入自定义网站/接口数据源（custom）
+
+如果你有一个网站或接口可以提供各城市污染物数据（pm25、o3、no2、so2），可切换到自定义数据源：
+
+1) 在 `worker/wrangler.toml` 设置：
+```
+[vars]
+DATA_SOURCE = "custom"
+
+# 任选一项：
+# 1) URL 模板（优先），会用城市名替换 {city}
+# SOURCE_URL_TEMPLATE = "https://example.com/api?city={city}"
+
+# 2) 固定 URL（如果数据不是按城市拆分），可配合 CITY_PARAM_NAME 将城市加入 query
+# SOURCE_URL = "https://example.com/api"
+# CITY_PARAM_NAME = "city"
+
+# 可选：自定义请求头（JSON 字符串）
+# HEADERS_JSON = '{"User-Agent":"AQHI-Bot/1.0","Accept":"application/json"}'
+
+# 字段名映射（当源 JSON 字段名不同于 pm25/o3/no2/so2 时）
+# FIELD_PM25 = "pm2_5"
+# FIELD_O3 = "o3"
+# FIELD_NO2 = "no2"
+# FIELD_SO2 = "so2"
+```
+
+2) 部署并测试：
+- 部署：`cd worker && npm run deploy`
+- 测试不入库的抓取：`GET /api/admin/test-custom?city=杭州`
+- 手动抓取入库：`POST /api/admin/fetch-once`
+
+注意：
+- 建议你的数据源返回 JSON；目前内置解析优先按 JSON 处理（若返回 HTML，需要定制化解析，可联系维护者升级解析逻辑）。
+- 建议添加合适的 `User-Agent` 和必要的请求头；遵守源站的使用条款与频率限制。
 
 ---
 

@@ -6,10 +6,20 @@ compatibility_date = "2025-10-22"
 [[d1_databases]]
 binding = "AQHI_DB"
 database_name = "aqhi"
-# database_id = "<fill-after-wrangler-d1-create>"
+database_id = "76cd504f-dcf8-472e-be6e-65fb03097988"
 
 [triggers]
 crons = ["5 * * * *"] # 每小时第 5 分抓取
 
 [vars]
-DATA_SOURCE = "mock" # mock | custom
+DATA_SOURCE = "cnemc" # mock | custom | cnemc
+# 如果使用自定义抓取数据源(custom)，可按需配置以下变量：
+# SOURCE_URL_TEMPLATE = "https://example.com/api?city={city}"  # 优先使用，{city} 将替换为城市名
+# SOURCE_URL = "https://example.com/api"                        # 固定 URL；如需城市参数，可配合 CITY_PARAM_NAME 使用
+# CITY_PARAM_NAME = "city"                                      # 可选，将城市名放入 query 参数
+# HEADERS_JSON = '{"User-Agent":"AQHI-Bot/1.0","Accept":"application/json"}' # 可选，请求头 JSON
+# 字段名映射（源返回 JSON 的字段名）
+# FIELD_PM25 = "pm25"
+# FIELD_O3 = "o3"
+# FIELD_NO2 = "no2"
+# FIELD_SO2 = "so2"

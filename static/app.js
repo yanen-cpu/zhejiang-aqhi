@@ -10,6 +10,23 @@ function api(path){
   return base + path;
 }
 
+async function fetchMeta() {
+  try {
+    const res = await fetch(api('/api/meta'));
+    if (!res.ok) throw new Error('meta failed');
+    return await res.json();
+  } catch { return null; }
+}
+
+async function updateDataSourceLabel() {
+  const el = document.getElementById('ds-text-home');
+  if (!el) return;
+  const meta = await fetchMeta();
+  const ds = (meta && meta.data_source) ? String(meta.data_source).toLowerCase() : 'unknown';
+  const map = { mock: '演示 Mock', custom: '自定义', cnemc: 'CNEMC 官方' };
+  el.textContent = map[ds] || ds;
+}
+
 async function fetchAll() {
   const res = await fetch(api('/api/aqhi-all'));
   if (!res.ok) throw new Error('API 请求失败');
@@ -50,4 +67,4 @@ async function tick() {
 }
 
 setInterval(tick, 60 * 1000);
-window.addEventListener('load', tick);
+window.addEventListener('load', () => { tick(); updateDataSourceLabel(); });

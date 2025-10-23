@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 import { CITIES, City, floorToHour, hourEpoch, shanghaiNow } from './config';
 import { ADVICE_MAP, calculateERComponents, getAQHI } from './aqhi';
 import { MockDataSource } from './datasource/mock';
+import { CustomDataSource } from './datasource/custom';
+import { CNEMCDataSource } from './datasource/cnemc';
 
 type Bindings = {
   AQHI_DB: any; // D1Database
@@ -15,6 +17,10 @@ function getDataSource(env: Bindings) {
     case 'mock':
     default:
       return new MockDataSource();
+    case 'custom':
+      return new CustomDataSource(env as any);
+    case 'cnemc':
+      return new CNEMCDataSource();
   }
 }
 
@@ -26,7 +32,8 @@ async function insertOrUpdate(db: any, m: { city: City; ts_hour: number; pm25: n
 }
 
 async function ensureSchema(db: any) {
-  await db.exec(`CREATE TABLE IF NOT EXISTS measurements (
+  // 分步执行，避免某些环境下多语句 exec 解析问题
+  await db.prepare(`CREATE TABLE IF NOT EXISTS measurements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     city TEXT NOT NULL,
     ts_hour INTEGER NOT NULL,
@@ -35,8 +42,8 @@ async function ensureSchema(db: any) {
     no2 REAL NOT NULL,
     so2 REAL NOT NULL,
     UNIQUE(city, ts_hour)
-  );
-  CREATE INDEX IF NOT EXISTS idx_measurements_city_ts ON measurements(city, ts_hour);`);
+  )`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_measurements_city_ts ON measurements(city, ts_hour)`).run();
 }
 
 async function fetchOnceAll(env: Bindings) {
@@ -123,10 +130,22 @@ async function getHistory(env: Bindings, city: City, hours: number) {
 const app = new Hono<{ Bindings: Bindings }>();
 
 // CORS（默认允许所有来源；可改为指定域名）
-app.use('/api/*', cors({ origin: '*', allowMethods: ['GET', 'OPTIONS'] }));
+app.use('/api/*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'OPTIONS'] }));
+
+// 全局错误处理（便于线上定位 500）
+app.onError((err, c: any) => {
+  // 尽量返回可读信息（仅演示项目，生产可去掉 stack）
+  return c.json({ error: err?.message || String(err), stack: (err as any)?.stack || null }, 500);
+});
 
 // 健康检查
 app.get('/api/health', (c: any) => c.json({ ok: true }));
+
+// 元信息：返回当前后端数据源类型
+app.get('/api/meta', (c: any) => {
+  const ds = (c.env.DATA_SOURCE || 'mock');
+  return c.json({ data_source: ds });
+});
 
 // 列出城市
 app.get('/api/cities', async (c: any) => {
@@ -153,6 +172,20 @@ app.get('/api/aqhi-all', async (c: any) => {
   return c.json(results);
 });
 
+// 管理调试：手动抓取一轮（仅用于演示/调试，无鉴权）
+app.post('/api/admin/fetch-once', async (c: any) => {
+  await ensureSchema(c.env.AQHI_DB);
+  await fetchOnceAll(c.env);
+  return c.json({ ok: true });
+});
+
+// 方便浏览器点击测试：GET 也触发一次抓取（请谨慎使用，生产建议移除）
+app.get('/api/admin/fetch-once', async (c: any) => {
+  await ensureSchema(c.env.AQHI_DB);
+  await fetchOnceAll(c.env);
+  return c.json({ ok: true });
+});
+
 // 历史曲线
 app.get('/api/history', async (c: any) => {
   const city = (c.req.query('city') || '') as City;
@@ -173,3 +206,21 @@ export default {
     await fetchOnceAll(env);
   },
 };
+
+// 仅调试用：测试 custom 数据源（不入库）
+app.get('/api/admin/test-custom', async (c: any) => {
+  const city = (c.req.query('city') || CITIES[0]) as City;
+  const ds = getDataSource(c.env);
+  // @ts-ignore
+  if (!(ds instanceof CustomDataSource)) return c.json({ error: 'DATA_SOURCE != custom' }, 400);
+  const data = await (ds as any).fetchCurrent(city);
+  return c.json({ ok: true, sample: data });
+});
+
+// 仅调试用：通用测试当前数据源（不入库）
+app.get('/api/admin/test-ds', async (c: any) => {
+  const city = (c.req.query('city') || CITIES[0]) as City;
+  const ds = getDataSource(c.env);
+  const data = await (ds as any).fetchCurrent(city);
+  return c.json({ ok: true, sample: data, source: (c.env.DATA_SOURCE || 'mock') });
+});
