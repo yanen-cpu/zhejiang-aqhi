@@ -5,8 +5,13 @@ const LEVEL_TO_CLASS = {
   "红色": "lvl-red",
 };
 
+function api(path){
+  const base = (window.AQHI_API_BASE || localStorage.getItem('AQHI_API_BASE') || '').replace(/\/$/, '');
+  return base + path;
+}
+
 async function fetchAll() {
-  const res = await fetch('/api/aqhi-all');
+  const res = await fetch(api('/api/aqhi-all'));
   if (!res.ok) throw new Error('API 请求失败');
   return await res.json();
 }

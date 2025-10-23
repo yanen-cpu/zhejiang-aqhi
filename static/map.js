@@ -75,8 +75,13 @@ function initMap(){
   legend.addTo(map);
 }
 
+function api(path){
+  const base = (window.AQHI_API_BASE || localStorage.getItem('AQHI_API_BASE') || '').replace(/\/$/, '');
+  return base + path;
+}
+
 async function fetchAll(){
-  const res = await fetch('/api/aqhi-all');
+  const res = await fetch(api('/api/aqhi-all'));
   if(!res.ok) throw new Error('API 请求失败');
   const data = await res.json();
   debugInfo.api = true;
