@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>浙江 AQHI · 百度地图版（无需本地 GeoJSON）</title>
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    .legend {
+      position: absolute; right: 12px; bottom: 12px; background: #fff; padding: 8px 10px; border-radius: 6px; box-shadow: 0 1px 6px rgba(0,0,0,.15);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,PingFang SC,Microsoft YaHei,sans-serif; font-size: 12px;
+    }
+    .legend .item { display: flex; align-items: center; margin: 4px 0; }
+    .legend .swatch { width: 14px; height: 10px; margin-right: 6px; border-radius: 2px; }
+  </style>
+  <!-- 已配置百度地图 AK -->
+  <script src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=1uXZZAUeU4u1ByucgeGbQsyn6wWf1FNM"></script>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="legend" id="legend"></div>
+
+  <script src="/map-bmap.js"></script>
+</body>
+</html>

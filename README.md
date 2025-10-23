@@ -70,7 +70,7 @@ git push -u origin main
 - 等待几分钟，看到 `Your site is live!` 即表示前端已上线。
 - 暂时访问 `https://你的项目.pages.dev/` 可看到页面，但 API 尚未接好（下一节完成后正常）。
 
-路径提示：部署后 Pages 的站点根就是 `static/` 内容，本仓库已修正所有资源路径为根路径（如 `/styles.css`、`/map.html`、`/vendor/leaflet/leaflet.js`）。
+路径提示：部署后 Pages 的站点根就是 `static/` 内容，本仓库已修正所有资源路径为根路径（如 `/styles.css`、`/map.html`）。
 
 ---
 
@@ -199,7 +199,9 @@ Cloudflare Pages 会自动检测变更并重新部署，几分钟后生效。
 
 ## 🧭 六、可选：地图边界（Shapefile → GeoJSON）
 
-本仓库前端会尝试加载 `./geo/zhejiang_cities.geo.json` 用于地市区域着色。你可以用 `tools/shp_to_geojson.py` 将 Shapefile 转为 GeoJSON。
+说明：当前默认地图已切换为百度地图（BMapGL）并在线获取行政边界，无需本地 GeoJSON。本节仅在你选择用 Leaflet 本地渲染或需要自定义/离线边界时参考。
+
+如果使用 Leaflet 方案，前端会尝试加载 `./geo/zhejiang_cities.geo.json` 用于地市区域着色。你可以用 `tools/shp_to_geojson.py` 将 Shapefile 转为 GeoJSON。
 
 1) 安装依赖（本地可选）
 - `pip install pyshp`
@@ -222,7 +224,7 @@ python tools/shp_to_geojson.py --input "C:\Users\你\path\zj_city.shp" --output 
 - 11 城市（杭州、宁波、温州、嘉兴、湖州、绍兴、金华、衢州、舟山、台州、丽水）
 - 3 小时滑动平均，提供 ER 分量与总量
 - 定时抓取 + 冷启动自动补抓（mock）
-- 卡片视图 + 地图视图（Leaflet），支持边界着色
+- 卡片视图 + 地图视图（默认使用百度地图，行政区边界在线获取），无需本地 GeoJSON；可选 Leaflet + 本地 GeoJSON 方案
 
 目录结构（关键项）：
 - `static/`：前端静态资源（Pages 的构建输出目录）
@@ -244,11 +246,12 @@ python tools/shp_to_geojson.py --input "C:\Users\你\path\zj_city.shp" --output 
 1) 页面资源 404？
 - 请确认 Pages 的 Build output directory 设为 `static`；本仓库已将所有资源路径改为根路径（`/styles.css`、`/map.html` 等）。
 
-2) 地图底图不显示？
-- 浏览器控制台可能提示瓦片加载失败，多为网络因素；不影响 AQHI 数据展示。
-- 本仓库使用本地引入的 Leaflet；路径应为 `/vendor/leaflet/leaflet.css` 与 `/vendor/leaflet/leaflet.js`。
+2) 地图加载失败或空白（百度地图）？
+- 请在 `static/map.html` 中将 `YOUR_AK` 替换为你的百度地图 AK，并在开放平台为该 AK 配置域名白名单（可含 `*.pages.dev` 或你的自定义域名）。
+- 检查浏览器控制台是否有 `api.map.baidu.com` 加载或跨域错误，确认网络可访问。
+- 如需不依赖外网/AK 的方案，可改用本仓库的 Leaflet 本地版本（`/vendor/leaflet/` 资源 + 自带 `static/map.js` + 可选本地 GeoJSON）。
 
-3) GeoJSON 没加载？
+3) GeoJSON 没加载？（仅 Leaflet 方案适用）
 - 请确认 `static/geo/zhejiang_cities.geo.json` 存在，且地图脚本请求路径为 `/geo/zhejiang_cities.geo.json`。
 
 4) API 404 或 CORS 报错？
