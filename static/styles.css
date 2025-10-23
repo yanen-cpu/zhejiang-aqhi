@@ -1,0 +1,15 @@
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif;background:#0b1020;color:#f5f7ff}header{padding:20px 24px;background:#101735;border-bottom:1px solid #1b2450}h1{margin:0;font-size:22px}header .subtitle{margin-top:6px;font-size:13px;color:#9db0ff}main{padding:16px}footer{padding:12px 16px;color:#94a3b8;font-size:12px;border-top:1px solid #1b2450;background:#0f162e}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{border-radius:10px;padding:14px;background:#121a39;border:1px solid #27346b;box-shadow:0 1px 0 rgba(255,255,255,0.05) inset}
+.card .title{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.city{font-weight:600;font-size:16px}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:#22306d;color:#c9d4ff;border:1px solid #33459b}
+.value{font-size:34px;font-weight:700;line-height:1.1;margin:8px 0}
+.meta{font-size:12px;color:#a5b4fc}
+.advice{margin-top:10px;white-space:pre-wrap;font-size:12px;color:#e2e8f0;opacity:.9}
+
+/* 颜色等级背景边框 */
+.lvl-green{background:linear-gradient(180deg,rgba(16,170,95,.1),transparent)}
+.lvl-blue{background:linear-gradient(180deg,rgba(52,121,255,.12),transparent)}
+.lvl-yellow{background:linear-gradient(180deg,rgba(242,201,76,.14),transparent)}
+.lvl-red{background:linear-gradient(180deg,rgba(239,68,68,.12),transparent)}

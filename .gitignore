@@ -1,0 +1,34 @@
+# Node/Workers
+node_modules/
+worker/node_modules/
+worker/.wrangler/
+.wrangler/
+dist/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Env / Secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local data artifacts (none expected now)
+*.db

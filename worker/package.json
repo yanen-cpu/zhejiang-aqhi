@@ -1,0 +1,19 @@
+{
+  "name": "zj-aqhi-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --persist-to=./.wrangler/state",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply AQHI_DB --local"
+  },
+  "dependencies": {
+    "hono": "^4.6.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241022.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^3.80.0"
+  }
+}

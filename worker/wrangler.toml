@@ -1,0 +1,15 @@
+name = "zj-aqhi-worker"
+main = "src/index.ts"
+compatibility_date = "2025-10-22"
+
+# D1 数据库绑定：发布前请用 wrangler 创建并绑定数据库，更新 database_name 与 database_id
+[[d1_databases]]
+binding = "AQHI_DB"
+database_name = "aqhi"
+# database_id = "<fill-after-wrangler-d1-create>"
+
+[triggers]
+crons = ["5 * * * *"] # 每小时第 5 分抓取
+
+[vars]
+DATA_SOURCE = "mock" # mock | custom

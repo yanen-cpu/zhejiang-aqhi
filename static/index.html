@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>浙江 AQHI 实时展示</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>浙江省 11 地市 AQHI</h1>
+    <nav style="margin-top:8px;font-size:14px">
+      <a href="/" style="color:#93c5fd;margin-right:12px">卡片视图</a>
+      <a href="/map.html" style="color:#93c5fd">地图视图</a>
+    </nav>
+    <div class="subtitle">每小时更新 · 近3小时滑动平均计算</div>
+  </header>
+
+  <main>
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <footer>
+    <div>数据源：可接入官方平台或第三方 API；当前为演示数据源（Mock）</div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

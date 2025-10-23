@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.sqlite
+*.db
+.env
+.venv/
+build/
+dist/
+.git/
+.gitignore
+.vscode/
+**/__pycache__/
+**/.ipynb_checkpoints/

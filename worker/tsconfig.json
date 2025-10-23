@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "noEmit": true,
+    "types": ["@cloudflare/workers-types"],
+    "lib": ["ES2021", "WebWorker"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}
